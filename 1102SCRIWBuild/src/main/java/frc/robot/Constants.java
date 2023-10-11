@@ -15,7 +15,7 @@ package frc.robot;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
-
+  }
     public static final int steerFrontLeft = 10;
     public static final int steerFrontRight = 11; 
     public static final int steerBackLeft = 12;
@@ -55,15 +55,9 @@ public final class Constants {
     public static double pickupCone = 2.0;
     public static double pickupCube = 2.1;
 
-
-
-
-    public class SuperSetpoint(){
-      public double elevatorSetpoint;
-      public double wristSetpoint;
-      public double SuperSetpoint(double)
-        theElevator= Elevator;
-    }
+    public static double doubleSubPosition =2.2;
+    public static double singleSubPosition = 2.3; 
+    
 
 
 
@@ -79,5 +73,5 @@ public final class Constants {
 
 
   }
-}
+
 
