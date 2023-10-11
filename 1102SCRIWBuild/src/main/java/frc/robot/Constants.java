@@ -45,6 +45,9 @@ public final class Constants {
   public static int driverController = 0;
   public static int operatorController = 1;
 
+  public static int upperLimit = 1;
+  public static int lowerLimit = 2;
+
   public static double elevator_kP = 0.1;
   public static double elevator_kD = 0.1;
 
@@ -63,7 +66,7 @@ public final class Constants {
 
   public static double elevatorScoreCubeBottom = 0.0;
   public static double elevatorScoreCubeMiddle = 0.0;
-  public static double elevatorEcoreCubeTop = 0.0;
+  public static double elevatorScoreCubeTop = 0.0;
 
   public static double elevatorGroundCone = 0.0;
   public static double elevatorGroundCube = 0.0;
