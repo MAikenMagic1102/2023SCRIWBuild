@@ -41,8 +41,12 @@ public final class Constants {
 
   public static int driveMotorCurrentLimit = 55;
   public static int steerMotorCurrentLimit = 45;
+  public static int hRollerCurrentLimit = 15;
+  public static int vertRollerCurrentLimit = 25;
 
   public static int intakeSolenoid = 0;
+
+  public static int beamSensor = 3;
 
   public static int driverController = 0;
   public static int operatorController = 1;
