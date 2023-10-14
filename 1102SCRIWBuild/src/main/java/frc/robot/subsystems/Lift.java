@@ -9,8 +9,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Gamepiece;
+import frc.robot.Gamepiece.GamepieceType;
 
 public class Lift extends SubsystemBase {
   /** Creates a new Lift. */
@@ -24,6 +27,7 @@ public class Lift extends SubsystemBase {
     upperLimit = new DigitalInput(Constants.upperLimit);
     lowerLimit = new DigitalInput(Constants.lowerLimit);
   }
+
   public void setOpenLoop(double wristDemand, double elevatorDemand){
     elevator.set(elevatorDemand);
     wrist.set(wristDemand);
@@ -48,6 +52,55 @@ public class Lift extends SubsystemBase {
     return wrist.getClosedLoopError().getValueAsDouble();
   }
 
+  /////////////////////////////////////////
+  public CommandBase floorPickup(){
+    if(Gamepiece.currentGamepiece == GamepieceType.Cone){
+      return this.runOnce(
+        () -> setClosedLoopPosition(Constants.elevatorGroundCone, Constants.wristGroundCone)
+      );
+    }else{
+      return this.runOnce(
+        () -> setClosedLoopPosition(Constants.elevatorGroundCube, Constants.wristGroundCube)
+      );
+    }
+  }
+
+  public CommandBase scoreLow(){
+    if(Gamepiece.currentGamepiece == GamepieceType.Cone){
+      return this.runOnce(
+        () -> setClosedLoopPosition(Constants.elevatorScoreConeBottom, Constants.wristScoreConeBottom)
+      );
+    }else{
+      return this.runOnce(
+        () -> setClosedLoopPosition(Constants.elevatorScoreCubeBottom, Constants.wristScoreCubeBottom)
+      );
+    }
+  }
+
+  public CommandBase scoreMiddle(){
+    if(Gamepiece.currentGamepiece == GamepieceType.Cone){
+      return this.runOnce(
+        () -> setClosedLoopPosition(Constants.elevatorScoreConeMiddle, Constants.wristScoreConeMiddle)
+      );
+    }else{
+      return this.runOnce(
+        () -> setClosedLoopPosition(Constants.elevatorScoreCubeMiddle, Constants.wristScoreCubeMiddle)
+      );
+    }
+  }
+
+  public CommandBase scoreHigh(){
+    return this.runOnce(
+      () -> setClosedLoopPosition(Constants.elevatorScoreCubeTop, Constants.wristScoreCubeTop)
+    );
+  }
+  
+  public CommandBase liftStow(){
+    return this.runOnce(
+      () -> setClosedLoopPosition(Constants.elevatorStow, Constants.wristStow)
+    );
+  }
+   
 
   @Override
   public void periodic() {

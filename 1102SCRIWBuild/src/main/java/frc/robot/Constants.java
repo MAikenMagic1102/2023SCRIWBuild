@@ -72,6 +72,8 @@ public final class Constants {
   public static double elevatorGroundCube = 0.0;
   public static double elevatorDoublePickup = 0.0;
   public static double elevatorSinglePickup = 0.0;
+
+  public static double elevatorStow = 0.0;
   
   // Wrist
   public static double wristScoreConeBottom =  0.0;
@@ -85,5 +87,7 @@ public final class Constants {
   public static double wristGroundCube = 0.0;
   public static double wristDoublePickup = 0.0;
   public static double wristSinglePickup = 0.0;
+
+  public static double wristStow = 0.0;
 }
 
