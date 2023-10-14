@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -31,6 +33,41 @@ public class Lift extends SubsystemBase {
     wrist = new TalonFX(Constants.wrist);
     upperLimit = new DigitalInput(Constants.upperLimit);
     lowerLimit = new DigitalInput(Constants.lowerLimit);
+
+    TalonFXConfiguration elevatorConfigs = new TalonFXConfiguration();
+    elevatorConfigs.Slot0.kP = Constants.elevator_kP; // An error of 0.5 rotations results in 12V output
+    elevatorConfigs.Slot0.kD = Constants.elevator_kD; // A change of 1 rotation per second results in 0.1 volts output
+    // Peak output of 8 volts
+    elevatorConfigs.Voltage.PeakForwardVoltage = 8;
+    elevatorConfigs.Voltage.PeakReverseVoltage = -8;
+    
+    // Peak output of 130 amps
+    elevatorConfigs.TorqueCurrent.PeakForwardTorqueCurrent = 130;
+    elevatorConfigs.TorqueCurrent.PeakReverseTorqueCurrent = 130;
+
+    TalonFXConfiguration wristConfigs = new TalonFXConfiguration();
+    wristConfigs.Slot0.kP = Constants.wrist_kP; // An error of 0.5 rotations results in 12V output
+    wristConfigs.Slot0.kD = Constants.wrist_kD; // A change of 1 rotation per second results in 0.1 volts output
+    // Peak output of 8 volts
+    wristConfigs.Voltage.PeakForwardVoltage = 8;
+    wristConfigs.Voltage.PeakReverseVoltage = -8;
+    
+    // Peak output of 130 amps
+    wristConfigs.TorqueCurrent.PeakForwardTorqueCurrent = 130;
+    wristConfigs.TorqueCurrent.PeakReverseTorqueCurrent = 130;
+
+    /* Retry config apply up to 5 times, report if failure */
+    StatusCode wristStatus = StatusCode.StatusCodeNotInitialized;
+    StatusCode elevatorStatus = StatusCode.StatusCodeNotInitialized;
+    for (int i = 0; i < 5; ++i) {
+      elevatorStatus = elevator.getConfigurator().apply(elevatorConfigs);
+      wristStatus = wrist.getConfigurator().apply(wristConfigs);
+      if (elevatorStatus.isOK() && wristStatus.isOK()) break;
+    }
+    if(!elevatorStatus.isOK() && !wristStatus.isOK()) {
+      System.out.println("Could not apply configs, error code: " + elevatorStatus.toString() + " " + wristStatus.toString());
+    }
+
   }
 
   

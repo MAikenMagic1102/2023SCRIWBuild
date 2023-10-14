@@ -50,10 +50,10 @@ public final class Constants {
   public static int upperLimit = 1;
   public static int lowerLimit = 2;
 
-  public static double elevator_kP = 0.1;
+  public static double elevator_kP = 24;
   public static double elevator_kD = 0.1;
 
-  public static double wrist_kP = 0.1;
+  public static double wrist_kP = 24;
   public static double wrist_kD = 0.1;
 
   public static double vertRoller_kP = 0.1;
