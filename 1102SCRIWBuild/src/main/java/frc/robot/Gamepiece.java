@@ -20,5 +20,6 @@ public class Gamepiece {
     }
 
     public static void toggleGamePiece(){
+        currentGamepiece = currentGamepiece == GamepieceType.Cone ? GamepieceType.Cube : GamepieceType.Cone;
     }
 }
