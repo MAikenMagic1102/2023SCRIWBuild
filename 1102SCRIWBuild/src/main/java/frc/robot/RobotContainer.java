@@ -7,6 +7,7 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.LiftControl;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Lift;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,6 +31,11 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    myLift.setDefaultCommand(new LiftControl(myLift, 
+    () -> m_driverController.getLeftY(), 
+    () -> m_driverController.getRightY()).repeatedly());
+
     // Configure the trigger bindings
     configureBindings();
   }

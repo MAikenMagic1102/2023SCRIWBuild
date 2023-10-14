@@ -21,6 +21,11 @@ public class Lift extends SubsystemBase {
   TalonFX wrist;
   DigitalInput upperLimit;
   DigitalInput lowerLimit;
+  boolean systemZeroed = false;
+
+  double elevatorSetpoint = 0.0;
+  double wristSetpoint = 0.0;
+
   public Lift() {
     elevator = new TalonFX(Constants.elevator);
     wrist = new TalonFX(Constants.wrist);
@@ -28,14 +33,61 @@ public class Lift extends SubsystemBase {
     lowerLimit = new DigitalInput(Constants.lowerLimit);
   }
 
-  public void setOpenLoop(double wristDemand, double elevatorDemand){
+  
+  public void setElevatorOpenLoop(double elevatorDemand){
     elevator.set(elevatorDemand);
+  }
+
+  public void setWristOpenLoop(double wristDemand){
     wrist.set(wristDemand);
   }
-  public void setClosedLoopPosition(double evevatorPosition, double wristPosition){
+
+  public void setOpenLoop(double elevatorDemand, double wristDemand){
+    setElevatorOpenLoop(elevatorDemand);
+    setWristOpenLoop(wristDemand);
+  }
+
+  public void setClosedLoopElevatorPosition(double elevatorPosition){
     PositionVoltage request = new PositionVoltage(2.0);
     elevator.setControl(request);
+  }
+
+  public void setClosedLoopWristPosition(double wristPosition){
+    PositionVoltage request = new PositionVoltage(2.0);
     wrist.setControl(request);
+  }
+
+  public void setClosedLoopPosition(double elevatorPosition, double wristPosition){
+    setClosedLoopElevatorPosition(elevatorPosition);
+    setClosedLoopWristPosition(wristPosition);
+  }
+
+
+
+  public void initialize(){
+    if(systemZeroed && elevator.getStatorCurrent().getValueAsDouble() < 30.0){
+      setOpenLoop(0, -0.1);
+    }else{
+      setOpenLoop(0,0);
+      elevator.setPosition(0);
+      systemZeroed = true;
+    }
+  }
+
+  public void setElevatorSetpoint(double setpoint){
+    elevatorSetpoint = setpoint;
+  }
+
+  public void setWristSetpoint(double setpoint){
+    wristSetpoint = setpoint;
+  }
+
+  public double getElevatorSetpoint(){
+    return elevatorSetpoint;
+  }
+
+  public double getWristSetpoint(){
+    return wristSetpoint;
   }
 
   public double getElevatorPosition(){
@@ -52,7 +104,23 @@ public class Lift extends SubsystemBase {
     return wrist.getClosedLoopError().getValueAsDouble();
   }
 
+  public boolean getSystemZeroed(){
+    return systemZeroed;
+  }
+
   /////////////////////////////////////////
+  // public CommandBase liftControl(double wristDemand, double elevatorDemand){
+  //   if(!systemZeroed){
+  //     return this.runOnce(
+  //       () -> initialize()
+  //     );
+  //   }else{
+  //     return this.runOnce(
+  //       () -> setOpenLoop(wristDemand, elevatorDemand)
+  //     );
+  //   }
+  // }
+
   public CommandBase floorPickup(){
     if(Gamepiece.currentGamepiece == GamepieceType.Cone){
       return this.runOnce(
