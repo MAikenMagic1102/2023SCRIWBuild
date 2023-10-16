@@ -16,6 +16,7 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
   public static double deadband = 0.1;
 
   public static int steerFrontLeft = 10;
@@ -96,4 +97,3 @@ public final class Constants {
 
   public static double wristStow = 0.0;
 }
-
