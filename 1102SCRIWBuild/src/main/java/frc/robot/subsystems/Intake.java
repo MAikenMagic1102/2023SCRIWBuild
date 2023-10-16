@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -78,6 +79,49 @@ public class Intake extends SubsystemBase {
 
   public void setClosed(){
     single.set(false);
+  }
+
+  public void intakeHold(){
+    setClosed();
+    setvertOpenLoop(0.01);
+  }
+
+  public void intakeRelease(){
+    setOpen();
+  }
+
+  public void intakeReleaseCube(){
+    setvertOpenLoop(0.5);
+    setOpen();
+  }
+
+  public void intakeLaunchCube(){
+    setvertOpenLoop(1.0);
+    setOpen();
+  }
+
+  public CommandBase intakeHoldCommand(){
+    return this.runOnce(
+      () -> intakeHold()
+    );
+  }
+
+  public CommandBase intakeReleaseCommand(){
+    return this.runOnce(
+      () -> intakeRelease()
+    ); 
+  }
+
+  public CommandBase intakeReleaseCubeCommand(){
+    return this.runOnce(
+      () -> intakeReleaseCube()
+    );
+  } 
+
+  public CommandBase intakeLaunchCubeCommand(){
+    return this.runOnce(
+      () -> intakeLaunchCube()
+    );
   }
 
   @Override
