@@ -87,32 +87,75 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeInCube(){
-    setOpen();
-      if (getBeamSensor()){
-        setvertOpenLoop(-0.5);
-        setHRollerOpenLoop(-0.5);
-      }else {
-        setvertOpenLoop(0);
-        setHRollerOpenLoop(0);
-      }
-    }
-
-    public void intakeInHold(){
-      setOpen();
-      if (!getBeamSensor()){
-        setvertOpenLoop(-0.05);
-        setHRollerOpenLoop(-0.05);
-      }else {
-        setvertOpenLoop(0);
-        setHRollerOpenLoop(0);
-      }
-    }
-
-  public CommandBase intakeInCommand(){
-    return this.runOnce(
-      () -> intakeIn()
-    );
+	setOpen();
+    if (getBeamSensor()){
+		setvertOpenLoop(-0.5);
+		setHRollerOpenLoop(-0.5);
+    }else {
+		setvertOpenLoop(0);
+		setHRollerOpenLoop(0);
+	}
   }
+
+   public void intakeInHold(){
+     setOpen();
+     if (!getBeamSensor()){
+       setvertOpenLoop(-0.05);
+       setHRollerOpenLoop(-0.05);
+     }else {
+       setvertOpenLoop(0);
+       setHRollerOpenLoop(0);
+     }
+   }
+
+	public void intakeHold(){
+		setClosed();
+		setvertOpenLoop(0.01);
+	}
+	
+	public void intakeRelease(){
+		setOpen();
+	}
+	
+	public void intakeReleaseCube(){
+		setvertOpenLoop(0.5);
+		setOpen();
+	}
+	
+	public void intakeLaunchCube(){
+		setvertOpenLoop(1.0);
+		setOpen();
+	}
+	
+	public CommandBase intakeHoldCommand(){
+		return this.runOnce(
+		() -> intakeHold()
+		);
+	}
+	
+	public CommandBase intakeReleaseCommand(){
+		return this.runOnce(
+		() -> intakeRelease()
+		); 
+	}
+	
+	public CommandBase intakeReleaseCubeCommand(){
+		return this.runOnce(
+		() -> intakeReleaseCube()
+		);
+	} 
+	
+	public CommandBase intakeLaunchCubeCommand(){
+		return this.runOnce(
+		() -> intakeLaunchCube()
+		);
+	}
+	
+	public CommandBase intakeInCommand(){
+	return this.runOnce(
+		() -> intakeIn()
+	);
+	}
 
   @Override
   public void periodic() {
