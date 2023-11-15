@@ -14,16 +14,19 @@ import frc.robot.subsystems.Lift;
 public class LiftControl extends CommandBase {
   /** Creates a new LiftControl. */
   Lift myLift;
-  double elevatorDemand;
-  double wristDemand;
+  DoubleSupplier elevatorDemandSup;
+  DoubleSupplier wristDemandSup;
   boolean resetHoldElevator = false;
   boolean resetHoldWrist = false;
+
+  double elevatorDemand, wristDemand;
 
   public LiftControl(Lift p_lift, DoubleSupplier elevatorSup, DoubleSupplier wristSup) {
     // Use addRequirements() here to declare subsystem dependencies.
     myLift = p_lift;
-    elevatorDemand = elevatorSup.getAsDouble();
-    wristDemand = wristSup.getAsDouble();
+    elevatorDemandSup = elevatorSup;
+    wristDemandSup = wristSup;
+    addRequirements(p_lift);
   }
 
   // Called when the command is initially scheduled.
@@ -33,10 +36,13 @@ public class LiftControl extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    elevatorDemand = elevatorDemandSup.getAsDouble();
+    wristDemand = wristDemandSup.getAsDouble();
+
     if(!myLift.getSystemZeroed()){
       myLift.initialize();
     }else{
-      if(MathUtil.applyDeadband(elevatorDemand, Constants.deadband) > 0){
+      if(Math.abs(elevatorDemand) > Constants.deadband){
         myLift.setElevatorOpenLoop(elevatorDemand);
         resetHoldElevator = true;
       }else{
@@ -52,8 +58,8 @@ public class LiftControl extends CommandBase {
         }
       }
 
-      if(MathUtil.applyDeadband(wristDemand, Constants.deadband) > 0){
-        myLift.setWristOpenLoop(wristDemand);
+      if(Math.abs(wristDemand) > Constants.deadband){
+        myLift.setWristOpenLoop(wristDemand * 0.18);
         resetHoldWrist = true;
       }else{
         if(resetHoldWrist){

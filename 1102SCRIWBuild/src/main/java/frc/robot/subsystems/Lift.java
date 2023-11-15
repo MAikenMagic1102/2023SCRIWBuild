@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 
@@ -30,11 +31,11 @@ public class Lift extends SubsystemBase {
   DigitalInput lowerLimit;
   boolean systemZeroed = false;
 
-  double elevatorSetpoint = 0.0;
+  double elevatorSetpoint = 2.0;
   double wristSetpoint = 0.0;
 
   public Lift() {
-    elevator = new TalonFX(Constants.elevator);
+    elevator = new TalonFX(Constants.elevator, "can2");
     wrist = new TalonFX(Constants.wrist);
     upperLimit = new DigitalInput(Constants.upperLimit);
     lowerLimit = new DigitalInput(Constants.lowerLimit);
@@ -50,6 +51,11 @@ public class Lift extends SubsystemBase {
     elevatorConfigs.TorqueCurrent.PeakForwardTorqueCurrent = 130;
     elevatorConfigs.TorqueCurrent.PeakReverseTorqueCurrent = 130;
 
+    // elevatorConfigs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    // elevatorConfigs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.2;
+    // elevatorConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    // elevatorConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 140.5;
+
     TalonFXConfiguration wristConfigs = new TalonFXConfiguration();
     wristConfigs.Slot0.kP = Constants.wrist_kP; // An error of 0.5 rotations results in 12V output
     wristConfigs.Slot0.kD = Constants.wrist_kD; // A change of 1 rotation per second results in 0.1 volts output
@@ -60,6 +66,13 @@ public class Lift extends SubsystemBase {
     // Peak output of 130 amps
     wristConfigs.TorqueCurrent.PeakForwardTorqueCurrent = 130;
     wristConfigs.TorqueCurrent.PeakReverseTorqueCurrent = 130;
+
+    // wristConfigs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    // wristConfigs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 23.0;
+    // wristConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    // wristConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.5;
+
+    elevatorConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     /* Retry config apply up to 5 times, report if failure */
     StatusCode wristStatus = StatusCode.StatusCodeNotInitialized;
@@ -90,12 +103,12 @@ public class Lift extends SubsystemBase {
   }
 
   public void setClosedLoopElevatorPosition(double elevatorPosition){
-    PositionVoltage request = new PositionVoltage(2.0);
+    PositionVoltage request = new PositionVoltage(elevatorPosition);
     elevator.setControl(request);
   }
 
   public void setClosedLoopWristPosition(double wristPosition){
-    PositionVoltage request = new PositionVoltage(2.0);
+    PositionVoltage request = new PositionVoltage(wristPosition);
     wrist.setControl(request);
   }
 
@@ -107,10 +120,10 @@ public class Lift extends SubsystemBase {
 
 
   public void initialize(){
-    if(systemZeroed && elevator.getStatorCurrent().getValueAsDouble() < 30.0){
-      setOpenLoop(0, -0.1);
+    if(!systemZeroed && elevator.getStatorCurrent().getValueAsDouble() < 20.0){
+      setElevatorOpenLoop(-0.1);
     }else{
-      setOpenLoop(0,0);
+      setElevatorOpenLoop(0.0);
       elevator.setPosition(0);
       systemZeroed = true;
     }
@@ -122,6 +135,11 @@ public class Lift extends SubsystemBase {
 
   public void setWristSetpoint(double setpoint){
     wristSetpoint = setpoint;
+  }
+
+  public void setLiftSetpoint(double elevatorSetpoint, double wristSetpoint){
+    this.elevatorSetpoint = elevatorSetpoint;
+    this.wristSetpoint = wristSetpoint;
   }
 
   public double getElevatorSetpoint(){
@@ -166,11 +184,11 @@ public class Lift extends SubsystemBase {
   public CommandBase floorPickup(){
     if(Gamepiece.currentGamepiece == GamepieceType.Cone){
       return this.runOnce(
-        () -> setClosedLoopPosition(Constants.elevatorGroundCone, Constants.wristGroundCone)
+        () -> setLiftSetpoint(Constants.elevatorGroundCone, Constants.wristGroundCone)
       );
     }else{
       return this.runOnce(
-        () -> setClosedLoopPosition(Constants.elevatorGroundCube, Constants.wristGroundCube)
+        () -> setLiftSetpoint(Constants.elevatorGroundCube, Constants.wristGroundCube)
       );
     }
   }
@@ -178,11 +196,11 @@ public class Lift extends SubsystemBase {
   public CommandBase scoreLow(){
     if(Gamepiece.currentGamepiece == GamepieceType.Cone){
       return this.runOnce(
-        () -> setClosedLoopPosition(Constants.elevatorScoreConeBottom, Constants.wristScoreConeBottom)
+        () -> setLiftSetpoint(Constants.elevatorScoreConeBottom, Constants.wristScoreConeBottom)
       );
     }else{
       return this.runOnce(
-        () -> setClosedLoopPosition(Constants.elevatorScoreCubeBottom, Constants.wristScoreCubeBottom)
+        () -> setLiftSetpoint(Constants.elevatorScoreCubeBottom, Constants.wristScoreCubeBottom)
       );
     }
   }
@@ -190,24 +208,24 @@ public class Lift extends SubsystemBase {
   public CommandBase scoreMiddle(){
     if(Gamepiece.currentGamepiece == GamepieceType.Cone){
       return this.runOnce(
-        () -> setClosedLoopPosition(Constants.elevatorScoreConeMiddle, Constants.wristScoreConeMiddle)
+        () -> setLiftSetpoint(Constants.elevatorScoreConeMiddle, Constants.wristScoreConeMiddle)
       );
     }else{
       return this.runOnce(
-        () -> setClosedLoopPosition(Constants.elevatorScoreCubeMiddle, Constants.wristScoreCubeMiddle)
+        () -> setLiftSetpoint(Constants.elevatorScoreCubeMiddle, Constants.wristScoreCubeMiddle)
       );
     }
   }
 
   public CommandBase scoreHigh(){
     return this.runOnce(
-      () -> setClosedLoopPosition(Constants.elevatorScoreCubeTop, Constants.wristScoreCubeTop)
+      () -> setLiftSetpoint(Constants.elevatorScoreCubeTop, Constants.wristScoreCubeTop)
     );
   }
   
   public CommandBase liftStow(){
     return this.runOnce(
-      () -> setClosedLoopPosition(Constants.elevatorStow, Constants.wristStow)
+      () -> setLiftSetpoint(Constants.elevatorStow, Constants.wristStow)
     );
   }
    
@@ -218,7 +236,11 @@ public class Lift extends SubsystemBase {
 
     SmartDashboard.putNumber("Elevator Position", getElevatorPosition());
     SmartDashboard.putNumber("Elevator Error", getElevatorError());
+    SmartDashboard.putNumber("Elevator Setpoint", elevatorSetpoint);
     SmartDashboard.putNumber("Wrist Position", getWristPosition());
     SmartDashboard.putNumber("Wrist Error", getWristError());
+    SmartDashboard.putNumber("Wrist Setpoint", wristSetpoint);
+    SmartDashboard.putNumber("Elevator Stator Current", elevator.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putBoolean("Elevator Zeroed", systemZeroed);
   }
 }

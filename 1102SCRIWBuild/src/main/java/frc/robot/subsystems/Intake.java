@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -18,6 +19,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Gamepiece;
+import frc.robot.Gamepiece.GamepieceType;
 
 public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
@@ -39,8 +42,10 @@ public class Intake extends SubsystemBase {
     hRoller.setSmartCurrentLimit(Constants.hRollerCurrentLimit);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.StatorCurrentLimit = Constants.vertRollerCurrentLimit;
+    // config.CurrentLimits.StatorCurrentLimitEnable = true;
+    // config.CurrentLimits.StatorCurrentLimit = Constants.vertRollerCurrentLimit;
+
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     hub = new PneumaticHub();
     single = new Solenoid(PneumaticsModuleType.REVPH, Constants.intakeSolenoid);
@@ -65,7 +70,7 @@ public class Intake extends SubsystemBase {
     hRoller.set(hRollerDemand);
   }
 
-  public double getVelocity(){
+  public double getVRollerVelocity(){
     return vertRoller.getRotorVelocity().getValueAsDouble();
   }
 
@@ -81,39 +86,39 @@ public class Intake extends SubsystemBase {
     single.set(false);
   }
 
-  public void intakeIn(){
+  public void intakeInCone(){
     setOpen();
-    setvertOpenLoop(-0.5);
+    setvertOpenLoop(-0.3);
   }
 
   public void intakeInCube(){
 	setOpen();
     if (getBeamSensor()){
-		setvertOpenLoop(-0.5);
-		setHRollerOpenLoop(-0.5);
+		setvertOpenLoop(-0.3);
+		setHRollerOpenLoop(-0.3);
     }else {
 		setvertOpenLoop(0);
 		setHRollerOpenLoop(0);
-	}
+	  }
   }
 
-   public void intakeInHold(){
-     setOpen();
-     if (!getBeamSensor()){
-       setvertOpenLoop(-0.05);
-       setHRollerOpenLoop(-0.05);
-     }else {
-       setvertOpenLoop(0);
-       setHRollerOpenLoop(0);
-     }
-   }
+  public void intakeHoldCube(){
+    setOpen();
+    if (!getBeamSensor()){
+      setvertOpenLoop(-0.05);
+      setHRollerOpenLoop(-0.0);
+    }else {
+      setvertOpenLoop(0);
+      setHRollerOpenLoop(0);
+    }
+  }
 
-	public void intakeHold(){
+	public void intakeHoldCone(){
 		setClosed();
 		setvertOpenLoop(0.01);
 	}
 	
-	public void intakeRelease(){
+	public void intakeReleaseCone(){
 		setOpen();
 	}
 	
@@ -127,41 +132,51 @@ public class Intake extends SubsystemBase {
 		setOpen();
 	}
 	
-	public CommandBase intakeHoldCommand(){
-		return this.runOnce(
-		() -> intakeHold()
-		);
-	}
-	
-	public CommandBase intakeReleaseCommand(){
-		return this.runOnce(
-		() -> intakeRelease()
-		); 
-	}
-	
-	public CommandBase intakeReleaseCubeCommand(){
-		return this.runOnce(
-		() -> intakeReleaseCube()
-		);
-	} 
-	
-	public CommandBase intakeLaunchCubeCommand(){
-		return this.runOnce(
-		() -> intakeLaunchCube()
-		);
-	}
-	
-	public CommandBase intakeInCommand(){
-	return this.runOnce(
-		() -> intakeIn()
-	);
-	}
+  public CommandBase intakeIn(){
+    if(Gamepiece.getGamepiece() == GamepieceType.Cube){
+      return this.runOnce(
+        () -> intakeInCube()
+      );
+    }else{
+      //Gamepiece.currentGamepiece == GamepieceType.Cone
+      return this.runOnce(
+        () -> intakeInCone()
+      );
+    }
+  }
+
+  public CommandBase intakeHold(){
+    if(Gamepiece.getGamepiece() == GamepieceType.Cube){
+      System.out.println("IntakeHoldCube");
+      return this.runOnce(
+        () -> intakeHoldCube()
+      );
+    }else{
+      System.out.println("IntakeHoldCone");
+      return this.runOnce(
+        () -> intakeHoldCone()
+      );
+    }
+  }
+
+  public CommandBase intakeRelease(){
+    if(Gamepiece.getGamepiece() == GamepieceType.Cube){
+      return this.runOnce(
+        () -> intakeReleaseCube()
+      );
+    }else{
+      return this.runOnce(
+        () -> intakeReleaseCone()
+      );
+    }
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("VertRoller Velocity", getVelocity());
+    SmartDashboard.putNumber("VertRoller Velocity", getVRollerVelocity());
     SmartDashboard.putBoolean("Beam Sensor", getBeamSensor());
+    SmartDashboard.putString("Gamepiece", Gamepiece.getGamepiece().toString());
   }
 }
 

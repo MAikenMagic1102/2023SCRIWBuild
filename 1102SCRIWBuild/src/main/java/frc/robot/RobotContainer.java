@@ -5,12 +5,21 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Gamepiece.GamepieceType;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.IntakeControl;
 import frc.robot.commands.LiftControl;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Lift;
+
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -21,21 +30,32 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  final double MaxSpeed = 6; // 6 meters per second desired top speed
+  final double MaxAngularRate = Math.PI; // Half a rotation per second max angular velocity
+
+  /* Setting up bindings for necessary control of the swerve drive platform */
+  //CommandXboxController joystick = new CommandXboxController(0); // My joystick
+  CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
+  SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric().withIsOpenLoop(true); // I want field-centric
+                                                                                            // driving in open loop
+  SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+  SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+  Telemetry logger = new Telemetry(MaxSpeed);
+
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final Lift myLift = new Lift();
+  // private final Lift myLift = new Lift();
+  // private final Intake myIntake = new Intake();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
+  private final CommandXboxController driver =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
+
+  private final CommandXboxController operator =
+      new CommandXboxController(OperatorConstants.kOperatorControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-    myLift.setDefaultCommand(new LiftControl(myLift, 
-    () -> m_driverController.getLeftY(), 
-    () -> m_driverController.getRightY()).repeatedly());
-
     // Configure the trigger bindings
     configureBindings();
   }
@@ -50,17 +70,32 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    
+    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
+    drivetrain.applyRequest(() -> drive.withVelocityX(-driver.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+        .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+    ));
+
+    driver.a().whileTrue(drivetrain.applyRequest(() -> brake));
+
+    driver.b().whileTrue(drivetrain.applyRequest(() -> 
+        point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
+
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    // new Trigger(m_exampleSubsystem::exampleCondition)
+    //     .onTrue(new ExampleCommand(m_exampleSubsystem));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_driverController.a().onTrue(myLift.floorPickup());
-    m_driverController.x().onTrue(myLift.scoreLow());
-    m_driverController.b().onTrue(myLift.scoreMiddle());
-    m_driverController.y().onTrue(myLift.scoreHigh());
-    m_driverController.povDown().onTrue(myLift.liftStow());
+    // operator.a().onTrue(myLift.floorPickup());
+    // operator.x().onTrue(myLift.scoreLow());
+    // operator.b().onTrue(myLift.scoreMiddle());
+    // operator.y().onTrue(myLift.scoreHigh());
+    // operator.povDown().onTrue(myLift.liftStow());
+
+    // operator.start().onTrue(new InstantCommand(() -> Gamepiece.toggleGamePiece()));
+
   }
 
   /**

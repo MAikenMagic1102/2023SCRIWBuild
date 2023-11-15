@@ -15,6 +15,7 @@ package frc.robot;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
   }
 
   public static double deadband = 0.1;
@@ -43,11 +44,11 @@ public final class Constants {
   public static int driveMotorCurrentLimit = 55;
   public static int steerMotorCurrentLimit = 45;
   public static int hRollerCurrentLimit = 15;
-  public static int vertRollerCurrentLimit = 25;
+  public static int vertRollerCurrentLimit = 80;
 
   public static int intakeSolenoid = 0;
 
-  public static int beamSensor = 3;
+  public static int beamSensor = 0;
 
   public static int driverController = 0;
   public static int operatorController = 1;
@@ -59,7 +60,7 @@ public final class Constants {
   public static double elevator_kD = 0.1;
 
   public static double wrist_kP = 24;
-  public static double wrist_kD = 0.1;
+  public static double wrist_kD = 5;
 
   public static double vertRoller_kP = 0.1;
   public static double vertRoller_kD = 0.1;
@@ -68,32 +69,33 @@ public final class Constants {
   public static double wheelCircumference = wheelDiameter * Math.PI;
 
   // Positions for the elevator
-  public static double elevatorScoreConeBottom =  0.0;
-  public static double elevatorScoreConeMiddle = 0.0;
+  public static double elevatorScoreConeBottom =  3.0;
+  public static double elevatorScoreConeMiddle = 136.83;
 
-  public static double elevatorScoreCubeBottom = 0.0;
-  public static double elevatorScoreCubeMiddle = 0.0;
+  public static double elevatorScoreCubeBottom = 3.0;
+  public static double elevatorScoreCubeMiddle = 137.83;
   public static double elevatorScoreCubeTop = 0.0;
 
-  public static double elevatorGroundCone = 0.0;
-  public static double elevatorGroundCube = 0.0;
+  public static double elevatorGroundCone = 0.8;
+  public static double elevatorGroundCube = 53.8;
   public static double elevatorDoublePickup = 0.0;
   public static double elevatorSinglePickup = 0.0;
 
-  public static double elevatorStow = 0.0;
+  public static double elevatorStow = 2.0;
   
   // Wrist
-  public static double wristScoreConeBottom =  0.0;
-  public static double wristScoreConeMiddle = 0.0;
+  public static double wristScoreConeBottom =  15.7;
+  public static double wristScoreConeMiddle = 12.4;
 
-  public static double wristScoreCubeBottom = 0.0;
-  public static double wristScoreCubeMiddle = 0.0;
+  public static double wristScoreCubeBottom = 15.7;
+  public static double wristScoreCubeMiddle = 14.1;
   public static double wristScoreCubeTop = 0.0;
 
-  public static double wristGroundCone = 0.0;
-  public static double wristGroundCube = 0.0;
+  public static double wristGroundCone = 15.7;
+  public static double wristGroundCube = 22.4;
   public static double wristDoublePickup = 0.0;
   public static double wristSinglePickup = 0.0;
 
-  public static double wristStow = 0.0;
+  public static double wristTravel = 0.0;
+  public static double wristStow = 0.75;
 }
